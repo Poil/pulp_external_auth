@@ -1,10 +1,12 @@
 * Apache Configuration :
   * Install Module
+
 ```
 yum install  mod_authnz_external
 ```
 
   * /etc/httpd/conf.d/authnz_external.conf
+
 ```
 LoadModule authnz_external_module modules/mod_authnz_external.so
 DefineExternalAuth pwauth pipe /usr/bin/pwauth
@@ -12,6 +14,7 @@ DefineExternalAuth ldapssa pipe /usr/local/bin/auth_ldap.py
 ```
 
   * /etc/httpd/conf.d/pulp.conf
+
 ```
 <Files webservices.wsgi>
     # pass everything that isn't a Basic auth request through to Pulp
