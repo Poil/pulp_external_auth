@@ -23,11 +23,13 @@ if __name__ == "__main__":
     user_password = sys.stdin.readline().strip()
 
     if user_name == config['super_admin'] and user_password == config['super_password']:
-        sys.stderr.write("Super admin is authenticated\n")
+        if config.get('debug', False):
+            sys.stderr.write("Super admin is authenticated\n")
         sys.exit(0)
 
     if user_name in config['service_account'] and user_password == config['service_account'][user_name]:
-        sys.stderr.write("Service account is authenticated\n")
+        if config.get('debug', False):
+            sys.stderr.write("Service account is authenticated\n")
         sys.exit(0)
 
     ldap.set_option(ldap.OPT_REFERRALS, 0)
@@ -51,20 +53,23 @@ if __name__ == "__main__":
         if len(result) > 1:
             sys.stderr.write("Authentication failed: multiple match for user {} in the LDAP Tree\n".format(user_name))
             sys.exit(1)
-        sys.stderr.write("Result {}\n".format(result))
+        if config.get('debug', False):
+            sys.stderr.write("Result {}\n".format(result))
 
         user_dn = result[0][0]
         member_of = result[0][1]['memberOf']
-        sys.stderr.write("Found user_dn {}\n".format(user_dn))
-        sys.stderr.write("Found memberOf {}\n".format(member_of))
+        if config.get('debug', False):
+            sys.stderr.write("Found user_dn {}\n".format(user_dn))
+            sys.stderr.write("Found memberOf {}\n".format(member_of))
         connect.unbind_s()
 
         # try to bind with founded user_dn / passed password
         try:
             connectu = ldap.initialize(ldap_server)
             connectu.bind_s(user_dn, user_password)
-            sys.stderr.write("Check {}\n".format(connectu.whoami_s()))
-            sys.stderr.write("Authentication OK: for user {} {}\n".format(user_name, user_dn))
+            if config.get('debug', False):
+                sys.stderr.write("Check {}\n".format(connectu.whoami_s()))
+                sys.stderr.write("Authentication OK: for user {} {}\n".format(user_name, user_dn))
             connectu.unbind_s()
             # Check if user already exist in the local DB
             r = subprocess.check_output([
@@ -97,8 +102,10 @@ if __name__ == "__main__":
                                 '--login={}'.format(user_name),
                                 '--role-id={}'.format(role)])
             else:
-                sys.stderr.write("User {} already exists in pulpDB\n".format(user_name))
-            sys.stderr.write("Authentication successful for user {}\n".format(user_name))
+                if config.get('debug', False):
+                    sys.stderr.write("User {} already exists in pulpDB\n".format(user_name))
+            if config.get('debug', False):
+                sys.stderr.write("Authentication successful for user {}\n".format(user_name))
             sys.exit(0)
         except subprocess.CalledProcessError as e:
             sys.stderr.write("pulp-admin failed with error {}\n".format(e))
