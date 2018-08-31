@@ -91,9 +91,15 @@ if __name__ == "__main__":
                     '--login={}'.format(user_name),
                     '--password={}'.format(user_password)])
 
-                for role in config['role_mapping']:
-                    for group in role:
+                for role, groups in config['role_mapping'].iteritems():
+                    if config.get('debug', False):
+                        sys.stderr.write("mapping role {}\n".format(role))
+                    for group in groups:
+                        if config.get('debug', False):
+                            sys.stderr.write("is group match {}\n".format(group))
                         if group in member_of:
+                            if config.get('debug', False):
+                                sys.stderr.write("group match {}\n".format(group))
                             subprocess.call([
                                 '/usr/bin/pulp-admin',
                                 '-u', super_admin,
